@@ -18,19 +18,25 @@ public class Main {
             Statement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = conn.createStatement();
+                stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+                        ResultSet.CONCUR_READ_ONLY);
+
                 rs = stmt.executeQuery(
                         "SELECT RPAD(nazwisko, 10), nazwa " +
                                 "from pracownicy natural join zespoly");
+
                 int rowcount = 0;
-                int i = 0;
+                if (rs.last()) {
+                    rowcount = rs.getRow();
+                    rs.beforeFirst();
+                }
+                System.out.println("zatrudniono " + rowcount + " pracownikow");
+
                 while (rs.next()) {
                     System.out.println(
                             rs.getString(1) + " w zespole " +
-                                    rs.getString(2));
-                    i++;
+                            rs.getString(2));
                 }
-                System.out.println("zatrudniono " + i + " pracownikow");
             } catch (SQLException ex) {
                 System.out.println("Bład wykonania polecenia" + ex.toString());
             } finally {
