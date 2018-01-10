@@ -9,7 +9,7 @@ public class Main {
         Connection conn;
         Properties connectionProps = new Properties();
         connectionProps.put("user", "inf127239");
-        connectionProps.put("password", "KUBAzdan000");
+        connectionProps.put("password", "inf127239");
         try {
             conn = DriverManager.getConnection(
                     "jdbc:oracle:thin:@//admlab2.cs.put.poznan.pl:1521/dblab02_students.cs.put.poznan.pl",
@@ -18,6 +18,8 @@ public class Main {
             Statement stmt = null;
             ResultSet rs = null;
             try {
+
+
                 stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                         ResultSet.CONCUR_READ_ONLY);
 
