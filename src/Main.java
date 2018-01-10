@@ -19,26 +19,32 @@ public class Main {
             ResultSet rs = null;
             try {
 
-
                 stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                         ResultSet.CONCUR_READ_ONLY);
 
                 rs = stmt.executeQuery(
-                        "SELECT RPAD(nazwisko, 10), nazwa " +
-                                "from pracownicy natural join zespoly");
+                        "SELECT RPAD(nazwisko, 10), placa_pod " +
+                                "from pracownicy WHERE etat = 'ASYSTENT'" +
+                                "ORDER BY placa_pod DESC ");
 
                 int rowcount = 0;
                 if (rs.last()) {
                     rowcount = rs.getRow();
-                    rs.beforeFirst();
+                    //rs.beforeFirst();
                 }
-                System.out.println("zatrudniono " + rowcount + " pracownikow");
 
-                while (rs.next()) {
-                    System.out.println(
-                            rs.getString(1) + " w zespole " +
-                            rs.getString(2));
-                }
+                System.out.println(rs.getString(1) + " zarobił " +
+                                    rs.getString(2));
+
+                if(rs.relative(-2))
+                    System.out.println(rs.getString(1) + " zarobił " +
+                        rs.getString(2));
+
+                if(rs.next())
+                    System.out.println(rs.getString(1) + " zarobił " +
+                                    rs.getString(2));
+
+
             } catch (SQLException ex) {
                 System.out.println("Bład wykonania polecenia" + ex.toString());
             } finally {
