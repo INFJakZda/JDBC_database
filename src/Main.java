@@ -22,27 +22,22 @@ public class Main {
                 stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                         ResultSet.CONCUR_READ_ONLY);
 
-                rs = stmt.executeQuery(
-                        "SELECT RPAD(nazwisko, 10), placa_pod " +
-                                "from pracownicy WHERE etat = 'ASYSTENT'" +
-                                "ORDER BY placa_pod DESC ");
+                int changes = 0;
+                int [] zwolnienia={150, 200, 230};
+                String [] zatrudnienia={"Kandefer", "Rygiel", "Boczar"};
 
-                int rowcount = 0;
-                if (rs.last()) {
-                    rowcount = rs.getRow();
-                    //rs.beforeFirst();
+                for(int index : zwolnienia){
+                    changes += stmt.executeUpdate(
+                            "DELETE FROM pracownicy WHERE id_prac=" + index);
                 }
+                System.out.println("Usunieto " + changes + " pracowników");
+                changes = 0;
 
-                System.out.println(rs.getString(1) + " zarobił " +
-                                    rs.getString(2));
-
-                if(rs.relative(-2))
-                    System.out.println(rs.getString(1) + " zarobił " +
-                        rs.getString(2));
-
-                if(rs.next())
-                    System.out.println(rs.getString(1) + " zarobił " +
-                                    rs.getString(2));
+                for(int i = 0; i < 3; i++){
+                    changes += stmt.executeUpdate("INSERT INTO pracownicy(id_prac,nazwisko) "
+                            + "VALUES(" + zwolnienia[i] + ", '" + zatrudnienia[i] + "')");
+                }
+                System.out.println("Wstawiono " + changes + " krotek.");
 
 
             } catch (SQLException ex) {
