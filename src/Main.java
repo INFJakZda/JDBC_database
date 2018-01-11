@@ -18,49 +18,37 @@ public class Main {
             System.out.println("Połączono z bazą danych");
             Statement stmt = null;
             ResultSet rs = null;
+            PreparedStatement pstmt = null;
             try {
-                //******************
-                conn.setAutoCommit(false);
-                //******************
-                stmt = conn.createStatement();
-                rs = stmt.executeQuery("select nazwa " +
-                        "from etaty");
+                int [] indeksy = {300, 310, 320};
+                String [] nazwiska={"Woźniak", "Dąbrowski", "Kozłowski"};
+                int [] place={1300, 1700, 1500};
+                String []etaty={"ASYSTENT", "PROFESOR", "ADIUNKT"};
+                //*************************
+                pstmt = conn.prepareStatement("select nazwisko from pracownicy");
+                rs = pstmt.executeQuery();
                 while (rs.next()) {
-                    System.out.println(rs.getString(1));
+                    System.out.println(rs.getString("NAZWISKO"));
                 }
-                System.out.println("**********");
-                //******************
-                stmt.executeUpdate("INSERT INTO etaty(nazwa)"
-                        + "VALUES('REKTOR')");
-                //******************
-                rs = stmt.executeQuery("select nazwa " +
-                        "from etaty");
+                System.out.println("**************************");
+                //*************************
+                pstmt = conn.prepareStatement("INSERT INTO pracownicy " +
+                        "(id_prac, nazwisko, placa_pod, etat) VALUES(?, ?, ?, ?)");
+
+                for(int i = 0; i < 3; i++) {
+                    pstmt.setInt(1, indeksy[i]);
+                    pstmt.setString(2, nazwiska[i]);
+                    pstmt.setInt(3, place[i]);
+                    pstmt.setString(4, etaty[i]);
+                    pstmt.executeQuery();
+                }
+                //*************************
+                pstmt = conn.prepareStatement("select nazwisko from pracownicy");
+                rs = pstmt.executeQuery();
                 while (rs.next()) {
-                    System.out.println(rs.getString(1));
+                    System.out.println(rs.getString("NAZWISKO"));
                 }
-                System.out.println("**********");
-                //******************
-                conn.rollback();
-                //******************
-                rs = stmt.executeQuery("select nazwa " +
-                        "from etaty");
-                while (rs.next()) {
-                    System.out.println(rs.getString(1));
-                }
-                System.out.println("**********");
-                //******************
-                stmt.executeUpdate("INSERT INTO etaty(nazwa)"
-                        + "VALUES('REKTOR')");
-                //******************
-                conn.commit();
-                //******************
-                rs = stmt.executeQuery("select nazwa " +
-                        "from etaty");
-                while (rs.next()) {
-                    System.out.println(rs.getString(1));
-                }
-                System.out.println("**********");
-                //******************
+                //*************************
             } catch (SQLException ex) {
                 System.out.println("Bład wykonania polecenia" + ex.toString());
             } finally {
@@ -72,6 +60,11 @@ public class Main {
                 if (stmt != null) {
                     try {
                         stmt.close();
+                    } catch (SQLException e) { /* kod obsługi */ }
+                }
+                if (pstmt != null) {
+                    try {
+                        pstmt.close();
                     } catch (SQLException e) { /* kod obsługi */ }
                 }
             }
