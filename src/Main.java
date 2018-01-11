@@ -14,32 +14,53 @@ public class Main {
             conn = DriverManager.getConnection(
                     "jdbc:oracle:thin:@//admlab2.cs.put.poznan.pl:1521/dblab02_students.cs.put.poznan.pl",
                     connectionProps);
+
             System.out.println("Połączono z bazą danych");
             Statement stmt = null;
             ResultSet rs = null;
             try {
-
-                stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
-                        ResultSet.CONCUR_READ_ONLY);
-
-                int changes = 0;
-                int [] zwolnienia={150, 200, 230};
-                String [] zatrudnienia={"Kandefer", "Rygiel", "Boczar"};
-
-                for(int index : zwolnienia){
-                    changes += stmt.executeUpdate(
-                            "DELETE FROM pracownicy WHERE id_prac=" + index);
+                //******************
+                conn.setAutoCommit(false);
+                //******************
+                stmt = conn.createStatement();
+                rs = stmt.executeQuery("select nazwa " +
+                        "from etaty");
+                while (rs.next()) {
+                    System.out.println(rs.getString(1));
                 }
-                System.out.println("Usunieto " + changes + " pracowników");
-                changes = 0;
-
-                for(int i = 0; i < 3; i++){
-                    changes += stmt.executeUpdate("INSERT INTO pracownicy(id_prac,nazwisko) "
-                            + "VALUES(" + zwolnienia[i] + ", '" + zatrudnienia[i] + "')");
+                System.out.println("**********");
+                //******************
+                stmt.executeUpdate("INSERT INTO etaty(nazwa)"
+                        + "VALUES('REKTOR')");
+                //******************
+                rs = stmt.executeQuery("select nazwa " +
+                        "from etaty");
+                while (rs.next()) {
+                    System.out.println(rs.getString(1));
                 }
-                System.out.println("Wstawiono " + changes + " krotek.");
-
-
+                System.out.println("**********");
+                //******************
+                conn.rollback();
+                //******************
+                rs = stmt.executeQuery("select nazwa " +
+                        "from etaty");
+                while (rs.next()) {
+                    System.out.println(rs.getString(1));
+                }
+                System.out.println("**********");
+                //******************
+                stmt.executeUpdate("INSERT INTO etaty(nazwa)"
+                        + "VALUES('REKTOR')");
+                //******************
+                conn.commit();
+                //******************
+                rs = stmt.executeQuery("select nazwa " +
+                        "from etaty");
+                while (rs.next()) {
+                    System.out.println(rs.getString(1));
+                }
+                System.out.println("**********");
+                //******************
             } catch (SQLException ex) {
                 System.out.println("Bład wykonania polecenia" + ex.toString());
             } finally {
