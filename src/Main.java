@@ -20,35 +20,33 @@ public class Main {
             ResultSet rs = null;
             PreparedStatement pstmt = null;
             try {
-                int [] indeksy = {300, 310, 320};
-                String [] nazwiska={"Woźniak", "Dąbrowski", "Kozłowski"};
-                int [] place={1300, 1700, 1500};
-                String []etaty={"ASYSTENT", "PROFESOR", "ADIUNKT"};
-                //*************************
-                pstmt = conn.prepareStatement("select nazwisko from pracownicy");
-                rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    System.out.println(rs.getString("NAZWISKO"));
-                }
-                System.out.println("**************************");
-                //*************************
-                pstmt = conn.prepareStatement("INSERT INTO pracownicy " +
-                        "(id_prac, nazwisko, placa_pod, etat) VALUES(?, ?, ?, ?)");
+                conn.setAutoCommit(false);
 
-                for(int i = 0; i < 3; i++) {
-                    pstmt.setInt(1, indeksy[i]);
-                    pstmt.setString(2, nazwiska[i]);
-                    pstmt.setInt(3, place[i]);
-                    pstmt.setString(4, etaty[i]);
+                pstmt = conn.prepareStatement("INSERT INTO pracownicy"
+                        + "(id_prac) VALUES(?)");
+
+                long start = System.nanoTime();
+                for(int i = 300; i < 2300; i++) {
+                    pstmt.setInt(1, i);
                     pstmt.executeQuery();
                 }
-                //*************************
-                pstmt = conn.prepareStatement("select nazwisko from pracownicy");
-                rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    System.out.println(rs.getString("NAZWISKO"));
+                long czas = System.nanoTime() - start;
+                System.out.println("Zwykłe: " + czas);
+
+                conn.rollback();
+
+                long start2 = System.nanoTime();
+                for(int i = 300; i < 2300; i++) {
+                    pstmt.setInt(1, i);
+                    pstmt.addBatch();
                 }
-                //*************************
+                pstmt.executeBatch();
+                long czas2 = System.nanoTime() - start2;
+
+                System.out.println("Wbudowane " + czas2);
+
+                conn.rollback();
+
             } catch (SQLException ex) {
                 System.out.println("Bład wykonania polecenia" + ex.toString());
             } finally {
