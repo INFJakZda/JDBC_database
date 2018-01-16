@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 public class Main {
 
     public static void main(String[] args) {
+
         Connection conn;
         Properties connectionProps = new Properties();
         connectionProps.put("user", "inf127239");
@@ -16,36 +17,24 @@ public class Main {
                     connectionProps);
 
             System.out.println("Połączono z bazą danych");
-            Statement stmt = null;
+            //Statement stmt = null;
             ResultSet rs = null;
             PreparedStatement pstmt = null;
+
+            CallableStatement stmt = conn.prepareCall("{? = call ZamienLitery(?, ?)}");
             try {
-                conn.setAutoCommit(false);
 
-                pstmt = conn.prepareStatement("INSERT INTO pracownicy"
-                        + "(id_prac) VALUES(?)");
-
-                long start = System.nanoTime();
-                for(int i = 300; i < 2300; i++) {
-                    pstmt.setInt(1, i);
-                    pstmt.executeQuery();
-                }
-                long czas = System.nanoTime() - start;
-                System.out.println("Zwykłe: " + czas);
-
-                conn.rollback();
-
-                long start2 = System.nanoTime();
-                for(int i = 300; i < 2300; i++) {
-                    pstmt.setInt(1, i);
-                    pstmt.addBatch();
-                }
-                pstmt.executeBatch();
-                long czas2 = System.nanoTime() - start2;
-
-                System.out.println("Wbudowane " + czas2);
-
-                conn.rollback();
+                stmt.setInt(2, 100);
+                stmt.setString(3, "Hapke");
+                stmt.registerOutParameter(1, Types.INTEGER);
+                stmt.execute();
+                int vCzyUdalo = stmt.getInt(1);
+                if(vCzyUdalo == 1)
+                    System.out.println("Udalo sie");
+                else
+                    System.out.println("Nie udalo sie");
+                stmt.close();
+                //stmt.close();
 
             } catch (SQLException ex) {
                 System.out.println("Bład wykonania polecenia" + ex.toString());
@@ -77,6 +66,7 @@ public class Main {
             Logger.getLogger(
                     Main.class.getName()).log(Level.SEVERE,"nie udało się połączyć z bazą danych", ex);
             System.exit(-1);
+            
         }
     }
 }
